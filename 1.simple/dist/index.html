@@ -6,8 +6,29 @@
     <title>Document</title>
 </head>
 <body>
-    <h1>Hello World</h1>
-    <h2>This website made with awesomeness</h2>
+    <nav class="nav" id="nav"
+        <div id="header" class="header">
+            <a href="#" class="logo">Inajiff</a>
+        </div>
+        <label for="nav__toggler">
+            <input type="checkbox" id="nav__toggler">
+            <ul class="nav__list">
+                <li><a href="#" class="nav__item">1.lorem</a></li>
+                <li><a href="#" class="nav__item">2.lorem</a></li>
+                <li><a href="#" class="nav__item">3.lorem</a></li>
+                <li><a href="#" class="nav__item">4.lorem</a></li>
+            </ul>
+            <p class="nav__toggler--icon">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </p>
+        </label>
+    </nav>
+    <div id="main">
+        <p class="bold h2">who am i?</p>
+        <h1 class="h1">My name is: <span id="names"></span></h1>
+    </div>
     <script src="bundle.js"></script>
 </body>
 </html>

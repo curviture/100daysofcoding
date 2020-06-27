@@ -1,3 +1,121 @@
-.red {
-    color: #f10
+/*
+    heavy #032E46
+    highlight #23B684
+    tone1: #043D5D
+    tone2: #0F595E
+*/
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: inherit;
+}
+
+html {
+    font-size: 62.5%;
+    box-sizing: border-box;
+}
+
+body {
+    box-sizing: inherit;
+}
+
+/*navigation styling*/
+
+/*navigation container styling*/
+
+.nav {
+    position: fixed;
+    height: 6rem;
+    right: 1rem;
+    top: 1rem;
+    left: 0;
+}
+
+#nav__toggler {
+    position: absolute;
+    left: 10000px;
+}
+
+/*styling hamburger like icon*/
+
+.nav__toggler--icon {
+    width: 6rem;
+    height: 6rem;
+    padding: .75rem .5rem;
+    position: absolute;
+    right: 0;
+    top: 0;
+    background-color: orangered;
+}
+
+.nav__toggler--icon .bar {
+    display: block;
+    height: .75rem;
+    background-color: #fff;
+}
+
+.nav__toggler--icon .bar:not(:last-child) {
+    margin-bottom: 1rem;
+}
+
+/* styling logo part of navigation */
+
+.logo {
+    font-size: 4rem;
+    text-transform: uppercase;
+    padding: 1rem 1rem 1rem;
+    color: orangered;
+    text-decoration: none;
+    display: inline-block;
+}
+
+/*styling navigation list*/
+
+.nav__list {
+    display: flex;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: all 0.25s ease-out;
+    float: right;
+    margin-right: 7rem;
+    background-color: #0F595E;
+    list-style-type: none;
+}
+
+#nav__toggler:checked + .nav__list {
+    transform: scale(1);
+}
+
+.nav__list li:not(:last-child) {
+    margin-right: 1rem;
+}
+
+.nav__list li {
+    padding: 1rem 0;
+}
+
+.nav__item {
+    font-size: 2rem;
+    color: #23b684;
+    text-decoration: none;
+    text-transform: uppercase;
+    padding: 1rem 1.5rem 0.5rem;
+    display: block;
+    border-bottom: 0.5rem solid transparent;
+    transition: all 0.25s;
+
+}
+
+.nav__item:hover {
+    border-bottom: 0.5rem solid orangered;    
+}
+
+#main {
+    height: 90vh;
+    background-color: #032E46;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-flow: column wrap;
 }

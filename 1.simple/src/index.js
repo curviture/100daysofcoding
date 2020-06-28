@@ -13,7 +13,10 @@ document.body.appendChild(div);
 
 const typedOpt = {
     loop: true,
-    loopCount: Infinity
+    loopCount: Infinity,
+    typeSpeed: 150,
+    backSpeed: 75,
+    smartBackspace: true,
 }
 
 const typedStrings = [

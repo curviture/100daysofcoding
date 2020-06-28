@@ -119,3 +119,38 @@ body {
     align-items: center;
     flex-flow: column wrap;
 }
+
+#main p {
+    font-size: 3.2rem;
+    color: #ffffff;
+}
+
+#main .h1 {
+    font-size: 3.8rem;
+    color: #23b684;
+    text-transform: uppercase;
+}
+
+#names {
+    display: inline-block;
+    min-width: 15ch;
+    background-color: #0F595E;
+    text-align: center;
+}
+
+#features {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url('../src/assets/images/bg-1.jpg');
+    background-position: 0 0;
+    background-attachment: fixed;
+    background-size: cover;
+}
+
+
+
+#main .h1 span:not(#names) {
+    display: none;
+}

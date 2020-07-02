@@ -1,11 +1,9 @@
 let tictactoe = {
     field : '',
-    players: [],
-    playersTurn: 0,
-    init : function(players) {
-      this.players = players.slice();
+    players: ['p1','p2'],
+    playersTurn: 'p1',
+    init : function() {
       this.field = new Array(9).fill("*").join('');
-      this.playersTurn = 0;
     },
     printfield() {
         for(let k of this.field) {
@@ -32,18 +30,37 @@ function isWon(field) {
 }
 
 let node = {
-  init: function(value, children) {
-    this.value = value;
-    this.children = children.slice();
+  init: function(info, children) {
+    this.info = info;
+    this.children = children || [];
   },
-  value: "",
-  children: [],
+}
+
+let decisionTree = Object.create(node);
+
+decisionTree.init = function(field, player, isHead, score) {
+  this.field = field;
+  this.score = score;
+  this.player = player
+  this.isHead = this.isHead || isHead
+}
+
+decisionTree.setChildren = function() {
+  let count = 0;
+  while(count < this.field.length) {
+    if(this.field[count] == "*") {
+      let newField = field;
+      newField[count] = this.player == "p1" ? 'p2' : 'p1';
+      let newDecisionNode = Object.create(decisionTree);
+      newDecisionNode.init(newField, newField[count], false, undefined)
+      this.children.push(newDecisionNode)
+    }
+  }
 }
 
 let gamePlay = {
   init: function(players) {
     this.fieldAtTurns = [],
-    this.scores = {},
     this.decisionTrees = []
     for(let player of players) {
       this.scores[player] = 0;
@@ -60,17 +77,27 @@ let gamePlay = {
     }
     return moves
   },
-  evalMove: function(field,move) {
+  evalMove: function(field,move,playerToMove) {
     let newField = field;
-    newField[move] = 'p1',
-    isWon()
+    newField[move] = playerToMove; 
+    if(isWon(field)) {
+      return 1
+    }
+    return 0
+  },
+  buildDecisionNode: function(parentNode) {
+    let moves = parentNode.children.map(item => item.move);
+    let currentPlayer = parentNode.info.player
+    for(let i = 0; i < moves.length; i++) {
+      let decision = Object.create(node);
+      let newField = field;
+      newField[moves[i]] = currentPlayer;
+      decision.info = {field: newField,player: currentPlayer,move: move};
+      let children = this.possibleMoves(newField);
+      for(let child of children) {
+        let newNode = Object.create(node);
+        node.info.currentPlayer = currentPlayer == 'p1'? 'p2' : 'p1';
+      }
+    }
   }
 }
-
-const tictactoeG = Object.create(tictactoe);
-tictactoeG.init(['p1','p2']);
-
-const gamePlayG = Object.create(gamePlay);
-gamePlayG.init(tictactoeG.players.slice());
-console.log(gamePlayG.possibleMoves(tictactoeG.field));
-

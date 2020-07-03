@@ -1,9 +1,35 @@
+import './style.css';
+
+//rendering gamefield into window
+
+function render(field) {
+  let fieldDiv = document.getElementById('game__field');
+  for(let i = 0; i < field.length; i++) {
+    let square = document.createElement('div');
+    square.classList.add('game__square');
+    square.textContent = field[i];
+    square.id = `square-${i}`;
+    square.addEventListener('click', clickHandler)
+    fieldDiv.appendChild(square);
+  }
+}
+
+function clickHandler(event) {
+  console.log(event.target.id)
+}
+
+
+//object for overall game
+//stores information about players, gamestate
+//gamestate is currentplayer, fieldstatus
+
 let tictactoe = {
     field : '',
     players: ['p1','p2'],
     playersTurn: 'p1',
     init : function() {
       this.field = new Array(9).fill("*").join('');
+      this.playersTurn = 'p1'
     },
     printfield() {
         for(let k of this.field) {
@@ -58,34 +84,23 @@ decisionTree.setChildren = function() {
   }
 }
 
+//gameplay is object where computer will make decision about game
+//also it will evaluate game according field and players by building decision tree
+
 let gamePlay = {
-  init: function(players) {
-    this.fieldAtTurns = [],
-    this.decisionTrees = []
-    for(let player of players) {
-      this.scores[player] = 0;
-    }
+  init: function(field,playersTurn) {
+    this.playersTurn = playersTurn;
+    this.field = field
+    this.decisionTree = Object.create(decisionTree);
+    decisionTree.init(field,playersTurn,true,undefined);
   },
-  possibleMoves: function(field) {
-    let move = 0;
-    let moves = []
-    while(move < field.length) {
-      if(field[move] == '*') {
-        moves.push(move);
-      }
-      move++
-    }
-    return moves
-  },
-  evalMove: function(field,move,playerToMove) {
-    let newField = field;
-    newField[move] = playerToMove; 
+  evalMove: function(field,playerToMove) {
     if(isWon(field)) {
       return 1
     }
     return 0
   },
-  buildDecisionNode: function(parentNode) {
+  buildDecisionNode: function(field) {
     let moves = parentNode.children.map(item => item.move);
     let currentPlayer = parentNode.info.player
     for(let i = 0; i < moves.length; i++) {
@@ -101,3 +116,15 @@ let gamePlay = {
     }
   }
 }
+
+let t = Object.create(tictactoe);
+t.init()
+console.log(t)
+
+let g = Object.create(gamePlay);
+g.init(t.field,t.currentPlayer,true,undefined)
+console.log(g)
+g.init()
+console.log('g',g)
+
+render(t.field)

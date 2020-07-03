@@ -1,0 +1,30 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.game__window {
+    background-color: #000;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game__field {
+    background-color: #fff;
+    width: 30vw;
+    height: 30vh;
+    display: flex;
+    flex-flow: row wrap;
+}
+
+.game__square {
+    height: 10vh;
+    width: 10vw;
+    border: 1px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

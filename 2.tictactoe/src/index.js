@@ -1,5 +1,11 @@
 import './style.css';
 
+//helper function to replace string nth character
+
+function replacenth(str, index, char) {
+  return str.replace(/./g, (c, i) => index == i ? char : c)
+}
+
 //rendering gamefield into window
 
 function render(field) {
@@ -15,7 +21,16 @@ function render(field) {
 }
 
 function clickHandler(event) {
-  console.log(event.target.id)
+  let {id} = event.target;
+  let fieldNumber = id[id.length - 1];
+  if(t.field[fieldNumber] == "*") {
+    let charToReplace = t.playersTurn == 'p1' ? 'x' : 'o';
+    event.target.textContent = charToReplace;
+    let newField = t.field;
+    newField = replacenth(newField, fieldNumber, charToReplace);
+    t.field = newField;
+    t.playersTurn = t.playersTurn == 'p1' ? 'p2' : 'p1';
+  }
 }
 
 
@@ -41,19 +56,42 @@ let tictactoe = {
     },
 }
 
+function isSame() {
+  let a = Array.from(arguments[0]);
+  return a.every(i => i == a[0]);
+}
+
+function nE() {
+  let a = Array.from(arguments[0]);
+  return !a.some(item => item == '*')
+}
+
+function notEqual() {
+  let a = Array.from(arguments);
+  return isSame(a) && nE(a)
+}
+
+
 function isWon(field) {
   let f = field;
-  if(f[0] == f[1] == f[2] != "*"  || f[3] == f[4] == f[5] != "*" || f[6] == f[7] == f[8] != "*") {
+  if(notEqual(f[0],f[1],f[2])  || notEqual(f[3],f[4],f[5]) || notEqual(f[6],f[7],f[8])) {
     return true
   }
-  if(f[0] == f[3] == f[6] != "*"  || f[1] == f[4] == f[7] != "*" || f[2] == f[5] == f[8] != "*") {
+  if(notEqual(f[0], f[3], f[6]) || notEqual(f[1], f[4], f[7]) || notEqual(f[2], f[5] ,f[8])) {
     return true
   }
-  if(f[0] == f[4] == f[8] != "*"  || f[2] == f[4] == f[6] != "*" ) {
+  if(notEqual(f[0], f[4], f[8]) || notEqual(f[2], f[4], f[6])) {
     return true
   }
   return false
 }
+
+function evalMove(field) {
+  if(isWon(field)) {
+    return 1
+  }
+  return 0
+};
 
 let node = {
   init: function(info, children) {
@@ -64,23 +102,27 @@ let node = {
 
 let decisionTree = Object.create(node);
 
-decisionTree.init = function(field, player, isHead, score) {
+decisionTree.init = function(field, player, isHead, score, parent) {
   this.field = field;
   this.score = score;
   this.player = player
-  this.isHead = this.isHead || isHead
+  this.isHead = isHead;
+  this.children = [];
+  this.parent = parent
 }
 
 decisionTree.setChildren = function() {
   let count = 0;
   while(count < this.field.length) {
     if(this.field[count] == "*") {
-      let newField = field;
-      newField[count] = this.player == "p1" ? 'p2' : 'p1';
+      let newField = this.field;
+      newField = replacenth(newField, count, this.player == "p1" ? 'x' : 'o');
       let newDecisionNode = Object.create(decisionTree);
-      newDecisionNode.init(newField, newField[count], false, undefined)
+      let p = this.player == "p1" ? 'p2' : 'p1'
+      newDecisionNode.init(newField, p, false, undefined, this)
       this.children.push(newDecisionNode)
     }
+    count++
   }
 }
 
@@ -92,39 +134,40 @@ let gamePlay = {
     this.playersTurn = playersTurn;
     this.field = field
     this.decisionTree = Object.create(decisionTree);
-    decisionTree.init(field,playersTurn,true,undefined);
+    decisionTree.init(field,playersTurn,true,undefined,null);
+    this.decisionTree.score = evalMove(this.field);
   },
-  evalMove: function(field,playerToMove) {
-    if(isWon(field)) {
-      return 1
+  buildRootTree: function() {
+    this.decisionTree.setChildren()
+    for(let i = 0; i < this.decisionTree.children.length; i++) {
+
     }
-    return 0
   },
-  buildDecisionNode: function(field) {
-    let moves = parentNode.children.map(item => item.move);
-    let currentPlayer = parentNode.info.player
-    for(let i = 0; i < moves.length; i++) {
-      let decision = Object.create(node);
-      let newField = field;
-      newField[moves[i]] = currentPlayer;
-      decision.info = {field: newField,player: currentPlayer,move: move};
-      let children = this.possibleMoves(newField);
-      for(let child of children) {
-        let newNode = Object.create(node);
-        node.info.currentPlayer = currentPlayer == 'p1'? 'p2' : 'p1';
+  buildDepth: function() {
+    let depth = [];
+    depth[0] = this.decisionTree.children.map(child => child)
+    while(depth.length < 6) {
+      depth[depth.length] = [];
+      for(let i = 0; i < depth[depth.length - 2].length; i++) {
+        if(depth[depth.length - 2][i].score != 1 )
+          depth[depth.length - 2][i].setChildren()
+        let children = depth[depth.length - 2][i].children
+        children.forEach(child => child.score = evalMove(child.field));
+        depth[depth.length - 1] = depth[depth.length - 1].concat(children)
       }
+      let w = depth[depth.length - 1].filter(child => child.score == 1);
+      w.forEach(i => console.log(i))
     }
   }
 }
 
 let t = Object.create(tictactoe);
 t.init()
-console.log(t)
 
 let g = Object.create(gamePlay);
-g.init(t.field,t.currentPlayer,true,undefined)
-console.log(g)
-g.init()
-console.log('g',g)
+g.init(t.field,t.playersTurn,true,undefined);
+g.buildRootTree();
+g.buildDepth();
+
 
 render(t.field)

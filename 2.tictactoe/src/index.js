@@ -10,6 +10,7 @@ function replacenth(str, index, char) {
 
 function render(field) {
   let fieldDiv = document.getElementById('game__field');
+  fieldDiv.innerHTML = '';
   for(let i = 0; i < field.length; i++) {
     let square = document.createElement('div');
     square.classList.add('game__square');
@@ -30,7 +31,21 @@ function clickHandler(event) {
     newField = replacenth(newField, fieldNumber, charToReplace);
     t.field = newField;
     t.playersTurn = t.playersTurn == 'p1' ? 'p2' : 'p1';
-  }
+    let g = Object.create(gamePlay);
+    g.init(t.field,t.playersTurn,true,undefined);
+    let i = g.makeDecision(10);
+    if(t.playersTurn == 'p2') {
+      t.field = replacenth(t.field, i, 'o')
+      render(t.field)
+    } else {
+      t.field = replacenth(t.field, i, 'x')      
+      render(t.field)      
+    }
+    t.playersTurn = t.playersTurn == 'p1' ? 'p2' : 'p1';
+
+  };
+
+
 }
 
 
@@ -102,25 +117,24 @@ let node = {
 
 let decisionTree = Object.create(node);
 
-decisionTree.init = function(field, player, isHead, score, parent) {
+decisionTree.init = function(field, player, score, parent) {
   this.field = field;
   this.score = score;
   this.player = player
-  this.isHead = isHead;
-  this.children = [];
-  this.parent = parent
+  this.moves = [];
+  this.parent = parent;
 }
 
-decisionTree.setChildren = function() {
+decisionTree.setMoves = function() {
   let count = 0;
   while(count < this.field.length) {
     if(this.field[count] == "*") {
       let newField = this.field;
       newField = replacenth(newField, count, this.player == "p1" ? 'x' : 'o');
       let newDecisionNode = Object.create(decisionTree);
-      let p = this.player == "p1" ? 'p2' : 'p1'
-      newDecisionNode.init(newField, p, false, undefined, this)
-      this.children.push(newDecisionNode)
+      let p = this.player == "p1" ? 'p2' : 'p1';
+      newDecisionNode.init(newField, p, undefined, this,)
+      this.moves.push(newDecisionNode)
     }
     count++
   }
@@ -134,40 +148,131 @@ let gamePlay = {
     this.playersTurn = playersTurn;
     this.field = field
     this.decisionTree = Object.create(decisionTree);
-    decisionTree.init(field,playersTurn,true,undefined,null);
-    this.decisionTree.score = evalMove(this.field);
+    this.decisionTree.init(field,playersTurn,true,undefined,null);
+    this.depth = [];
   },
-  buildRootTree: function() {
-    this.decisionTree.setChildren()
-    for(let i = 0; i < this.decisionTree.children.length; i++) {
 
+  mining: function(index) {
+    let arr = this.depth[index];
+    for(let i = 0; i < arr.length; i++) {
+      let moves = arr[i].moves;
+      let min = moves.reduce((minScore, item) => item.score < minScore ? item.score : minScore, 1);
+      arr[i].score = min
     }
   },
-  buildDepth: function() {
-    let depth = [];
-    depth[0] = this.decisionTree.children.map(child => child)
-    while(depth.length < 6) {
-      depth[depth.length] = [];
-      for(let i = 0; i < depth[depth.length - 2].length; i++) {
-        if(depth[depth.length - 2][i].score != 1 )
-          depth[depth.length - 2][i].setChildren()
-        let children = depth[depth.length - 2][i].children
-        children.forEach(child => child.score = evalMove(child.field));
-        depth[depth.length - 1] = depth[depth.length - 1].concat(children)
-      }
-      let w = depth[depth.length - 1].filter(child => child.score == 1);
-      w.forEach(i => console.log(i))
+
+  maxing: function(index) {
+    let arr = this.depth[index];
+    for(let i = 0; i < arr.length; i++) {
+      let moves = arr[i].moves;
+      let max = moves.reduce((maxScore, item) => item.score > maxScore ? item.score : maxScore, -1);
+      arr[i].score = max
     }
+  },
+
+  makeDecision: function(m) {
+    this.buildDepth(m);
+    if(this.depth.length == 1) {
+      return this.depth[0][0].field.indexOf('*');
+    }
+    for(let i = this.depth.length - 2; i >= 0; i--) {
+      if(this.depth[i][0].player == 'p2') {
+        console.log('maxing')
+        this.mining(i)
+      } else {
+        console.log('mining')        
+        this.maxing(i)
+      }
+    }
+
+
+    let index = null;
+    let modified = '';
+
+    if(this.playersTurn == 'p1') {
+      let max = this.depth[0][0].moves.reduce((maxScore, item) => item.score > maxScore ? item.score : maxScore, -1);
+      let choices = this.depth[0][0].moves.filter(item => item.score == max);
+      index = Math.floor(Math.random() * choices.length);
+      modified = choices[index].field
+    }
+
+    if(this.playersTurn == 'p2') {
+      let min = this.depth[0][0].moves.reduce((minScore, item) => item.score < minScore ? item.score : minScore, 1);
+      let choices = this.depth[0][0].moves.filter(item => item.score == min);
+      index = Math.floor(Math.random() * choices.length);
+      modified = choices[index].field      
+    }
+    let origin = this.depth[0][0].field;
+    for(let i = 0; i < origin.length; i++) {
+      if(modified[i] != origin[i]) {
+        console.log(i);
+        return i
+      }
+    }
+  },
+
+  buildDepth: function(d) {
+    console.time('a')
+    //building depth array which
+    //each index of array correspondens of all possible solutions for 
+    //that depth
+
+
+    //initializing array
+    //creating first depth which represents current field
+    this.depth[0] = [this.decisionTree];
+    this.depth[0][0].score = evalMove(this.depth[0][0].field)
+    // console.log('d',this.depth[0],this.depth[0].length);
+    let iter = 0;
+    do {
+      let tmpDepth = []
+      for(let i = 0; i < this.depth[this.depth.length - 1].length; i++) {
+        let currentItem = this.depth[this.depth.length - 1][i];
+        if(currentItem.score == 0) {
+          currentItem.setMoves();
+          for(let move of currentItem.moves) {
+            let score = evalMove(move.field);
+            move.score = (move.player == 'p1' ? -1 : 1) * score
+            move.score = move.score == -0 ? 0 : move.score
+          }
+          tmpDepth = tmpDepth.concat(currentItem.moves)
+        }
+      }
+      if(tmpDepth != 0)
+        this.depth.push(tmpDepth);
+      iter++
+      // console.log(this.depth[this.depth.length - 1])
+    } while(this.depth.length < d && this.depth[this.depth.length - 1].length != 0 && iter < 2*d) //depth array length should be no bigger then what is declared
+    console.log('ddd',this.depth)
+    console.timeEnd('a');
+  },
+
+  rebuildDepthTree: function(modifiedLevelIndex) {
+    let l = modifiedLevelIndex;
+    if(l == this.depth.length - 1) {      
+      return false
+    }
+    while(l < this.depth.length - 1) {
+      let tmp = [];
+      for(let i = 0; i < this.depth[l].length && this.depth[l - 1].length > 0; i++) {
+        this.depth[l][i].setMoves();
+        tmp = this.depth[l][i].moves.slice();
+        tmp.forEach(item => {
+          item.score = evalMove(item.field)
+        })
+
+      }
+      l++
+      this.depth[l] = tmp.slice();
+    }
+    console.log('rb',this.depth[modifiedLevelIndex]);
   }
 }
 
+//starting game
+
 let t = Object.create(tictactoe);
-t.init()
-
-let g = Object.create(gamePlay);
-g.init(t.field,t.playersTurn,true,undefined);
-g.buildRootTree();
-g.buildDepth();
+t.init();
 
 
-render(t.field)
+render(t.field);

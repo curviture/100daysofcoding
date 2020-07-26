@@ -1,0 +1,42 @@
+.color-primary-0 { color: #3E13AF }	/* Main Primary color */
+.color-secondary-1-0 { color: #00AB6F }	/* Main Secondary color (1) */
+.color-secondary-2-0 { color: #E7003E }	/* Main Secondary color (2) */
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: calc(100% * calc(10/16));
+}
+
+body {
+    height: 100vh;
+    font-size: 1rem;
+    text-align: center;
+    min-width: 600px;
+    min-height: 400px;
+}
+
+h1 {
+    font-size: 3rem;
+}
+
+.game-container {
+    min-width: 600px;
+    min-height: 300px;
+    display: flex;
+    flex-flow: row wrap;
+}
+
+.board-container {
+    display: flex;
+    width: 40%;
+    font-size: 1rem;
+    flex-flow: row wrap;    
+}
+
+.board-container .grid-cell {
+    width: 4%;
+}

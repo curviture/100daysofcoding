@@ -9,6 +9,7 @@
 
 html {
     font-size: calc(100% * calc(10/16));
+    box-sizing: border-box;
 }
 
 body {
@@ -17,6 +18,11 @@ body {
     text-align: center;
     min-width: 600px;
     min-height: 400px;
+    box-sizing: border-box;
+}
+
+body * {
+    box-sizing: border-box;    
 }
 
 h1 {
@@ -24,19 +30,36 @@ h1 {
 }
 
 .game-container {
-    min-width: 600px;
-    min-height: 300px;
+    min-width: 1000px;
+    min-height: 600px;
     display: flex;
     flex-flow: row wrap;
+    justify-content: space-around;
+    align-items: center;
+    margin: 0 auto;
+    background-color: gray;
 }
 
 .board-container {
     display: flex;
-    width: 40%;
+    width: 30rem;
+    height: 30rem;
     font-size: 1rem;
-    flex-flow: row wrap;    
+    flex-flow: row wrap;
+    outline: 3rem solid #3E13AF;
 }
 
 .board-container .grid-cell {
-    width: 4%;
+    width: 3rem;
+    height: 3rem;
+    border: 1px solid black;
+    transition: all 0.5s 0.5s;
+}
+
+.board-container .grid-cell:hover {
+    border: 1px solid #00AB6F;
+}
+
+.grid-cell.ship {
+    background-color: #00AB6F;
 }

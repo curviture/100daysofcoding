@@ -40,26 +40,33 @@ h1 {
     background-color: gray;
 }
 
-.board-container {
+.grid-container {
     display: flex;
     width: 30rem;
     height: 30rem;
     font-size: 1rem;
     flex-flow: row wrap;
     outline: 3rem solid #3E13AF;
+    margin-bottom: 3rem;
 }
 
-.board-container .grid-cell {
+.grid-container .grid-cell {
     width: 3rem;
     height: 3rem;
     border: 1px solid black;
     transition: all 0.5s 0.5s;
 }
 
-.board-container .grid-cell:hover {
+.grid-container .grid-cell:hover {
     border: 1px solid #00AB6F;
 }
 
 .grid-cell.ship {
     background-color: #00AB6F;
+}
+
+#populate {
+    width: 100%;
+    padding: 1rem;
+    cursor: pointer;
 }

@@ -15,38 +15,29 @@ class SeaWars {
         this.p1.board = new Board({height, width})
         this.p2.board = new Board({height, width})
     }
-    generateShips() {
-        this.p1.board.populate();
-        this.p2.board.populate();
-    }
-    renderBoard(player) {
-        let d = new DomMan();
-        let boardCont = d.createElm('div');
-        boardCont.id = player.player;
-        d.appendToParent(boardCont, document.querySelector('.game-container'));
-        boardCont.classList.add('board-container');
-        for(let row of player.board.grid) {
-            for(let cell of row) {
-                let gridCell = d.createElm('div');
-                gridCell.classList.add('grid-cell')
-                if(cell == "") {
-                    gridCell.classList.add('empty')
-                } else if(cell == "o") {
-                    gridCell.classList.add('ship')
-                } else {
-                    gridCell.classList.add('debris')
-                }
-                d.appendToParent(gridCell, boardCont);
-            }
-        }
+    generateShips(player) {
+        console.log('generating ships');
+        console.log(this);
+        player.board.populate();
     }
     render() {
-        let d = new DomMan();
-        let gC = d.createElm('div');
-        gC.classList.add('game-container');
-        d.appendToParent(gC, document.body);
-        this.renderBoard(this.p1)
-        this.renderBoard(this.p2)        
+        const d = new DomMan();
+        d.clearNode(document.body);
+        const gameCont = d.createElm('div');
+        gameCont.classList.add('game-container');
+
+        const p1Cont = this.p1.render();
+        const boardP1 = this.p1.board.render();
+        d.appendToParent(boardP1, p1Cont);
+        d.appendToParent(p1Cont, gameCont);
+
+        const p2Cont = this.p2.render();
+        const boardP2 = this.p2.board.render();
+        d.appendToParent(boardP2, p2Cont);        
+        d.appendToParent(p2Cont, gameCont);
+
+        d.appendToParent(gameCont, document.body);
+
     }
 }
 
@@ -56,6 +47,13 @@ class Player {
         this.player = player;
         this.name = name;
 
+    }
+    render() {
+        const d = new DomMan();
+        let cont = d.createElm('div');
+        cont.classList.add('player-container');
+        cont.id = this.player;
+        return cont
     }
 }
 
@@ -137,6 +135,31 @@ class Board {
         }            
         console.log(this.grid);
     }
+    render() {
+        let d = new DomMan();
+        let gridCont = d.createElm('div');
+        gridCont.classList.add('grid-container')
+        for(let row of this.grid) {
+            for(let cell of row) {
+                let gridCell = d.createElm('div');
+                gridCell.classList.add('grid-cell')
+                let className = ""
+                switch(cell) {
+                    case "":  className = 'empty'
+                        break;
+                    case "o": className = 'ship'
+                        break;
+                    case "x": classname = 'debris'
+                        break;
+                    case ".": className = 'missed'
+                    default: "";
+                }
+                gridCell.classList.add(className);
+                d.appendToParent(gridCell, gridCont);
+            }
+        }
+        return gridCont;
+    }
 }
 
 class DomMan {
@@ -151,9 +174,14 @@ class DomMan {
     appendToParent(child, parent) {
         parent.appendChild(child)
     }
+    clearNode(elm) {
+        while (elm.firstChild) {
+            elm.removeChild(elm.firstChild);
+        }        
+    }
 }
 
 let game = new SeaWars('kitty', 'doggo');
-game.createBoard();
-game.generateShips();
+game.generateShips(game.p1);
+game.generateShips(game.p2);
 game.render()
